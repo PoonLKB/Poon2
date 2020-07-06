@@ -1,0 +1,46 @@
+branches:
+  only:
+    - master
+
+image:
+  - Visual Studio 2017
+
+stack: python 3.7
+
+cache:
+  # - '%LOCALAPPDATA%\pip\Cache'
+
+environment:
+  matrix:
+    - platform: x86
+      LIBUSB: "MS32/dll/libusb-1.0.dll"
+      PYTHON_HOME: C:\Python37
+      PYTHON_VERSION: '3.7'
+      PYTHON_ARCH: '32'
+
+build: off
+
+install:
+  - cmd: 7z x drivers\libusb-1.0.22.7z
+  - cmd: '%PYTHON_HOME%\Scripts\pip install -r requirements-dev.txt --user'
+  - cmd: '%PYTHON_HOME%\Scripts\pip install -r requirements.txt --user'
+
+build_script:
+  - cmd: '%PYTHON_HOME%\python misc\prebuild.py'
+  - cmd: '%PYTHON_HOME%\python -m PyInstaller --noconsole --onefile --clean --add-binary src/images/honda.ico;. --add-binary src/images/*;images --add-binary %LIBUSB%;. src/__main__.py --name HondaECU --icon=src/images/honda.ico'
+  - cmd: '%PYTHON_HOME%\python misc\postbuild.py'
+
+artifacts:
+  - path: dist\*
+
+deploy:
+  provider: GitHub
+  description: 'A diagnostic and flashing tool for Honda ECUs'
+  auth_token:
+    secure: VDADKxNk9UEQ11Ycj0bjwqi5yzJKuKOZ+qAWu5vfPqSQTeJDiCoqWSuCLYK1o2pC
+  artifact: /HondaECU-.*\.exe/
+  draft: false
+  prerelease: false
+  on:
+    branch: master
+    appveyor_repo_tag: true
