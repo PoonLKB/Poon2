@@ -5,7 +5,7 @@ pydispatcher
 wxPython
 requests
 lxml
-numpy==1.15.4
+numpy==1.22.0
 colour
 pyparsing
 gitpython
